@@ -68,7 +68,7 @@ export default function OnboardingPage() {
     try {
       await setDoc(doc(db, "users", user.uid), {
         ...formData,
-        role: "delegate", // Default role initially, could be selected in form
+        role: "user", // Default role initially, could be selected in form
         onboardingComplete: true,
         createdAt: new Date().toISOString(),
       });

@@ -24,9 +24,9 @@ export default function MyConferencesPage() {
   useEffect(() => {
     async function fetchMyConferences() {
       if (!user) return;
-      
+
       const apps = await getUserApplications(user.uid);
-      
+
       // Fetch event details for each application to get names/dates/locations
       const enhancedApps = await Promise.all(
         apps.map(async (app) => {
@@ -40,7 +40,7 @@ export default function MyConferencesPage() {
           };
         })
       );
-      
+
       setApplications(enhancedApps);
       setLoading(false);
     }
@@ -69,32 +69,44 @@ export default function MyConferencesPage() {
 
   return (
     <div className="space-y-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="flex justify-between items-start"
       >
-        <h1 className="text-3xl font-bold tracking-tight">My Conferences</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your conference applications, roles, and status across the platform.
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Conferences</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your conference applications or discover new events.
+          </p>
+        </div>
+        <button
+          onClick={() => window.location.href = '/dashboard/organizer/apply'}
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium shadow-lg shadow-primary/25 hover:bg-primary/90 transition-colors"
+        >
+          Organizer
+        </button>
       </motion.div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="my-conferences" className="w-full">
         <TabsList className="mb-6 bg-background/50 backdrop-blur-md border border-border/50">
-          <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
-            Active & Pending ({activeConferences.length})
+          <TabsTrigger value="my-conferences" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+            My Conferences ({activeConferences.length})
           </TabsTrigger>
-          <TabsTrigger value="past" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
-            Past Conferences ({pastConferences.length})
+          <TabsTrigger value="browse" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+            Browse Conferences
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <TabsContent value="my-conferences" className="mt-0">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold mb-2">Active & Pending</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
             {activeConferences.map((app, index) => (
-              <ConferenceCard 
-                key={app.id} 
+              <ConferenceCard
+                key={app.id}
                 id={app.id}
                 name={app.eventName}
                 date={app.eventDate}
@@ -113,13 +125,14 @@ export default function MyConferencesPage() {
               </div>
             )}
           </div>
-        </TabsContent>
 
-        <TabsContent value="past" className="mt-0">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold mb-2">Past Conferences</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {pastConferences.map((app, index) => (
-              <ConferenceCard 
-                key={app.id} 
+              <ConferenceCard
+                key={app.id}
                 id={app.id}
                 name={app.eventName}
                 date={app.eventDate}
@@ -131,12 +144,19 @@ export default function MyConferencesPage() {
                 delay={index * 0.1}
               />
             ))}
-             {pastConferences.length === 0 && (
+            {pastConferences.length === 0 && (
               <div className="col-span-full py-20 text-center text-muted-foreground glass-card rounded-2xl border-dashed">
                 <p className="text-xl font-medium mb-2">No past conferences</p>
                 <p>Your completed conferences will appear here.</p>
               </div>
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="browse" className="mt-0">
+          <div className="py-20 text-center text-muted-foreground glass-card rounded-2xl border-dashed">
+            <p className="text-xl font-medium mb-2">Browse Conferences</p>
+            <p>Coming soon: Discover and apply to Model UN conferences around the world.</p>
           </div>
         </TabsContent>
       </Tabs>

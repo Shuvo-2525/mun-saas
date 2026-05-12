@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, where, addDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where, addDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 
 export interface Committee {
@@ -13,6 +13,15 @@ export interface TicketingTier {
   capacity: number;
 }
 
+export interface ScheduleItem {
+  title: string;
+  startTime: string;
+  endTime: string;
+  type: "main" | "session" | "break" | "social";
+  location: string;
+  description?: string;
+}
+
 export interface EventData {
   id: string;
   title: string;
@@ -22,7 +31,8 @@ export interface EventData {
   description: string;
   committees: Committee[];
   coverUrl?: string;
-  
+  schedule?: ScheduleItem[];
+
   // Organizer specific fields
   organizerId?: string;
   status?: "draft" | "published";
@@ -32,13 +42,10 @@ export interface EventData {
 
 export async function getEventById(eventId: string): Promise<EventData | null> {
   try {
-    const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
-    
+    const eventSnap = await getDoc(doc(db, "events", eventId));
     if (eventSnap.exists()) {
       return { id: eventSnap.id, ...eventSnap.data() } as EventData;
     }
-    
     return null;
   } catch (error) {
     console.error("Error fetching event:", error);
@@ -48,9 +55,8 @@ export async function getEventById(eventId: string): Promise<EventData | null> {
 
 export async function getAllEvents(): Promise<EventData[]> {
   try {
-    const eventsRef = collection(db, "events");
-    const snapshot = await getDocs(eventsRef);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventData));
+    const snap = await getDocs(collection(db, "events"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as EventData));
   } catch (error) {
     console.error("Error fetching all events:", error);
     return [];
@@ -59,14 +65,22 @@ export async function getAllEvents(): Promise<EventData[]> {
 
 export async function createEvent(data: Omit<EventData, "id">): Promise<string> {
   try {
-    const eventsRef = collection(db, "events");
-    const docRef = await addDoc(eventsRef, {
+    const docRef = await addDoc(collection(db, "events"), {
       ...data,
       createdAt: new Date().toISOString(),
     });
     return docRef.id;
   } catch (error) {
     console.error("Error creating event:", error);
+    throw error;
+  }
+}
+
+export async function updateEvent(eventId: string, data: Partial<Omit<EventData, "id">>): Promise<void> {
+  try {
+    await updateDoc(doc(db, "events", eventId), { ...data, updatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.error("Error updating event:", error);
     throw error;
   }
 }

@@ -108,7 +108,7 @@ export function ComplaintSystem({ application, event }: ComplaintSystemProps) {
         <CardContent className="pt-6 space-y-4">
           <div className="space-y-2">
             <Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(v) => setType(v || "")}>
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>

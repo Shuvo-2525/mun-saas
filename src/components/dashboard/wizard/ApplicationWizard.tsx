@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { EventData } from "@/lib/services/eventService";
 import { submitApplication, ApplicationData } from "@/lib/services/applicationService";
+import { logActivity } from "@/lib/services/activityService";
+import { useAuth } from "@/contexts/AuthContext";
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 interface ApplicationWizardProps {
@@ -22,6 +24,7 @@ const STEPS = ["Role Selection", "Preferences", "Experience", "Review"];
 
 export function ApplicationWizard({ event, userId }: ApplicationWizardProps) {
   const router = useRouter();
+  const { profile } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -96,6 +99,16 @@ export function ApplicationWizard({ event, userId }: ApplicationWizardProps) {
     setIsSubmitting(false);
 
     if (res.success) {
+      logActivity({
+        userId,
+        actorName: profile?.displayName || "Delegate",
+        actorRole: formData.role,
+        type: "application_submitted",
+        action: "submitted an application for",
+        targetId: event.id,
+        targetTitle: event.title,
+        isPublic: true,
+      });
       setIsSuccess(true);
     } else {
       alert("Failed to submit application. Please try again.");
@@ -210,7 +223,7 @@ export function ApplicationWizard({ event, userId }: ApplicationWizardProps) {
                         <Select
                           value={formData.choices[level].committee}
                           onValueChange={(val) => {
-                            updateChoice(level, "committee", val);
+                            updateChoice(level, "committee", val || "");
                             updateChoice(level, "country", ""); // Reset country when committee changes
                           }}
                         >
@@ -232,7 +245,7 @@ export function ApplicationWizard({ event, userId }: ApplicationWizardProps) {
                         <Label>Country</Label>
                         <Select
                           value={formData.choices[level].country}
-                          onValueChange={(val) => updateChoice(level, "country", val)}
+                          onValueChange={(val) => updateChoice(level, "country", val || "")}
                           disabled={!formData.choices[level].committee}
                         >
                           <SelectTrigger>

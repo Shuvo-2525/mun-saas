@@ -84,6 +84,34 @@ export function Sidebar() {
             </Link>
           </div>
         )}
+
+        {(profile?.role === "admin" || profile?.isAdmin) && (
+          <div className="mt-4">
+            <h4 className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Admin Tools
+            </h4>
+            <Link href="/dashboard/admin" className="relative block">
+              <motion.div
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors relative z-10",
+                  pathname.includes("/dashboard/admin")
+                    ? "text-primary-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                <LayoutDashboard className="w-5 h-5" />
+                <span>Admin Dashboard</span>
+              </motion.div>
+              {pathname.includes("/dashboard/admin") && (
+                <motion.div
+                  layoutId="active-sidebar-item"
+                  className="absolute inset-0 bg-primary rounded-xl shadow-lg shadow-primary/25 z-0"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="p-4 mt-auto border-t border-border/40">
